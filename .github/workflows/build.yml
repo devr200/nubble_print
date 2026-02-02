@@ -73,17 +73,19 @@ jobs:
       with:
         path: artifacts
     
-    - name: Display structure
-      run: ls -R artifacts
+    - name: Rename executables for unique names
+      run: |
+        mkdir -p release
+        cp artifacts/NubblePrintClient.exe/NubblePrintClient.exe release/NubblePrintClient-Windows.exe || true
+        cp artifacts/NubblePrintClient-linux/NubblePrintClient release/NubblePrintClient-Linux || true
+        cp artifacts/NubblePrintClient-macos/NubblePrintClient release/NubblePrintClient-macOS || true
+        cp artifacts/NubblePrintClient.exe/.env release/.env.example || cp artifacts/NubblePrintClient-linux/.env release/.env.example || true
+        ls -la release
     
     - name: Create Release with artifacts
       uses: softprops/action-gh-release@v1
       with:
         tag_name: build-${{ github.run_number }}
         name: Build ${{ github.run_number }}
-        files: |
-          artifacts/NubblePrintClient.exe/NubblePrintClient.exe
-          artifacts/NubblePrintClient-linux/NubblePrintClient
-          artifacts/NubblePrintClient-macos/NubblePrintClient
-          artifacts/NubblePrintClient.exe/.env
+        files: release/*
         fail_on_unmatched_files: false
