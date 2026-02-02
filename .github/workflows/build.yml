@@ -26,10 +26,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
@@ -52,7 +52,7 @@ jobs:
         cp .env.example dist/.env
     
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact_name }}
         path: |
@@ -64,61 +64,24 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    permissions:
+      contents: write
     
     steps:
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
     
     - name: Display structure
       run: ls -R
     
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release with artifacts
+      uses: softprops/action-gh-release@v1
       with:
         tag_name: build-${{ github.run_number }}
-        release_name: Build ${{ github.run_number }}
-        draft: false
-        prerelease: false
-    
-    - name: Upload Windows executable
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./NubblePrintClient.exe/NubblePrintClient.exe
-        asset_name: NubblePrintClient-Windows.exe
-        asset_content_type: application/octet-stream
-    
-    - name: Upload Linux executable
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./NubblePrintClient-linux/NubblePrintClient
-        asset_name: NubblePrintClient-Linux
-        asset_content_type: application/octet-stream
-    
-    - name: Upload macOS executable
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./NubblePrintClient-macos/NubblePrintClient
-        asset_name: NubblePrintClient-macOS
-        asset_content_type: application/octet-stream
-    
-    - name: Upload .env template
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./NubblePrintClient.exe/.env
-        asset_name: .env
-        asset_content_type: text/plain
+        name: Build ${{ github.run_number }}
+        files: |
+          NubblePrintClient.exe/NubblePrintClient.exe
+          NubblePrintClient-linux/NubblePrintClient
+          NubblePrintClient-macos/NubblePrintClient
+          NubblePrintClient.exe/.env
+        fail_on_unmatched_files: false
