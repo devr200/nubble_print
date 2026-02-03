@@ -19,7 +19,7 @@ class Config:
     API_TIMEOUT = int(os.getenv('API_TIMEOUT', 10))
     
     # Printer
-    PRINTER_URL = os.getenv('PRINTER_URL', 'http://192.168.1.100:9100')  # IP stampante
+    PRINTER_URL = os.getenv('PRINTER_URL', 'http://192.168.1.251/cgi-bin/fpmate.cgi')  # IP stampante
     
     # Polling
     POLL_INTERVAL = int(os.getenv('POLL_INTERVAL', 5))

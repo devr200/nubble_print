@@ -32,6 +32,12 @@ class APIService:
                 data={'token': self.api_token},
                 timeout=self.timeout
             )
+            
+            # Il 404 è considerato un caso normale (nessun dato disponibile)
+            if response.status_code == 404:
+                logger.debug("Nessun dato disponibile dall'API (404)")
+                return None
+            
             response.raise_for_status()
             
             data = response.json()
@@ -75,6 +81,12 @@ class APIService:
                 data={'token': self.api_token},
                 timeout=self.timeout
             )
+            
+            # Il 404 è considerato una connessione riuscita (server raggiungibile)
+            if response.status_code == 404:
+                logger.info(f"Connessione all'API riuscita: {self.api_url} (nessun dato disponibile)")
+                return True
+            
             response.raise_for_status()
             logger.info(f"Connessione all'API riuscita: {self.api_url}")
             return True
